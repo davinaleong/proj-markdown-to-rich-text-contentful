@@ -1,0 +1,16 @@
+{
+  "name": "proj-markdown-to-rich-text-contentful",
+  "version": "1.0.0",
+  "description": "My project to convert Markdown to Rich Text",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Davina Leong",
+  "license": "MIT",
+  "devDependencies": {
+    "prisma": "^5.3.1",
+    "nodemon": "^3.0.1"
+  }
+}
