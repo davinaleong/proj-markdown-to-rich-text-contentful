@@ -1,2 +1,3 @@
-# proj-markdown-to-rich-text-contentful
+# Markdown to Rich Text Converter for Contentful
+
 My project to convert Markdown to Rich Text
