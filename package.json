@@ -13,6 +13,9 @@
   "license": "MIT",
   "devDependencies": {
     "@contentful/rich-text-from-markdown": "^15.16.8",
+    "contentful": "^10.5.2",
+    "contentful-management": "^10.46.2",
+    "dotenv": "^16.3.1",
     "lodash": "^4.17.21",
     "nodemon": "^3.0.1",
     "prisma": "^5.3.1"
