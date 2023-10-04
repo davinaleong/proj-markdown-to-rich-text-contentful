@@ -1,46 +1,55 @@
-const _ = require("lodash")
 const { PrismaClient } = require("@prisma/client")
+const { envVars } = require("contentful-management")
 const { richTextFromMarkdown } = require("@contentful/rich-text-from-markdown")
-const { environment, contentTypeIds } = require("./lib/contentful")
-const { logFunction, logValue } = require("./lib/helpers")
+const { logFunction, logValue } = require("./lib/helpers.lib")
+const { logFunction, logValue } = require("./lib/helpers.lib")
+const { contentTypeIds } = require("./lib/contentful.lib")
 
 const prisma = new PrismaClient()
 
-async function main() {
-  logFunction(`main`)
+const { title, slug, subtitle, summary, text, featured, status, published_at } =
+  prisma.posts.findFirst({ where: { id: 1 } })
 
-  const {
-    title,
-    slug,
-    subtitle,
-    summary,
-    text,
-    featured,
-    status,
-    published_at,
-  } = await prisma.posts.findFirst({ where: { id: 1 } })
-  //   const richText = await richTextFromMarkdown(text)
-  //   logValue(`richText`, richText)
-  await client.entry.create({
-    contentTypeId: contentTypeIds.posts,
-    fields: {
-      title: {
-        "en-US": title,
-      },
-      slug: {
-        "en-US": slug,
-      },
-      excerpt: {
-        "en-US": summary,
-      },
-      subtitle: {
-        "en-US": subtitle,
-      },
-      // body: await richTextFromMarkdown(text),
-      publishedAt: published_at,
-      featured: featured === true,
+const richText = richTextFromMarkdown(text)
+logValue(`richText`, richText)
+
+const client = contentful.createClient({
+  accessToken: envVars.accessToken,
+})
+
+const entry = {
+  fields: {
+    title: {
+      "en-US": title,
     },
-  })
+    slug: {
+      "en-US": slug,
+    },
+    excerpt: {
+      "en-US": summary,
+    },
+    subtitle: {
+      "en-US": subtitle,
+    },
+    body: {
+      "en-US": richText,
+    },
+    featured: {
+      "en-US": featured === true,
+    },
+  },
 }
 
-main()
+client
+  .getSpace(envVars.spaceId)
+  .then((space) => space.getEnvironment(envVars.environmentId))
+  .then((environment) => environment.createEntryWithId(contentTypeIds.posts), {
+    fields: {
+      title: {
+        "en-us": title,
+      },
+      slug: {
+        "en-us": slug,
+      },
+    },
+  })
