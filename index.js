@@ -2,7 +2,6 @@ const { PrismaClient } = require("@prisma/client")
 const contentful = require("contentful-management")
 const { richTextFromMarkdown } = require("@contentful/rich-text-from-markdown")
 const { BLOCKS } = require("@contentful/rich-text-types")
-const { logFunction, logValue } = require("./lib/helpers.lib")
 const { envVars, contentTypeIds } = require("./lib/contentful.lib")
 
 const client = contentful.createClient({
@@ -11,9 +10,21 @@ const client = contentful.createClient({
 
 const prisma = new PrismaClient()
 
-prisma.posts
-  .findFirst({ where: { id: 1 } })
-  .then((post) => {
+// Enhanced rich text handling
+const richTextOptions = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (node, next) => ({
+      nodeType: "paragraph",
+      content: next(node.content),
+    }),
+    // Add other Markdown element handlers as needed
+  },
+}
+
+async function migratePost(postId) {
+  try {
+    const post = await prisma.posts.findFirst({ where: { id: postId } })
+
     const {
       title,
       slug,
@@ -24,45 +35,35 @@ prisma.posts
       status,
       published_at,
     } = post
-    // console.log("post", post)
-
-    const richTextOptions = {
-      renderNode: {
-        [BLOCKS.PARAGRAPH]: (node, next) => {
-          return {
-            nodeType: "paragraph",
-            content: next(node.content),
-          }
-        },
-      },
-    }
 
     const richText = richTextFromMarkdown(text, richTextOptions)
 
-    // This API call will request a space with the specified ID
-    client.getSpace(envVars.spaceId).then((space) => {
-      // This API call will request an environment with the specified ID
-      space.getEnvironment(envVars.environmentId).then((environment) => {
-        // let's get a content type
-        environment.getContentType(contentTypeIds.posts).then((contentType) => {
-          // console.log("post > environment", title)
-          // console.log("contentType", contentType)
+    // Fetch space and environment
+    const space = await client.getSpace(envVars.spaceId)
+    const environment = await space.getEnvironment(envVars.environmentId)
 
-          // and now let's update its name
-          contentType.fields.title = title
-          contentType.fields.slug = slug
-          contentType.fields.excerpt = summary
-          contentType.fields.subtitle = subtitle
-          contentType.fields.body = richText.content
+    // Fetch content type (uncomment and verify)
+    const contentType = await environment.getContentType(contentTypeIds.posts)
+    contentType.fields.body = richText.content // Update content type field (if needed)
+    await contentType.update()
 
-          contentType.create()
+    const entryData = {
+      fields: {
+        title: { "en-US": title },
+        slug: { "en-US": slug },
+        subtitle: { "en-US": subtitle },
+        excerpt: { "en-US": summary },
+        body: { "en-US": richText },
+        // Add other fields as needed
+      },
+    }
 
-          // contentType.update().then((updatedContentType) => {
-          //   console.log("updatedContentType", updatedContentType)
-          //   console.log("Update was successful")
-          // })
-        })
-      })
-    })
-  })
-  .catch((error) => console.error(error))
+    const entry = await space.createEntry(contentTypeIds.posts, entryData)
+    console.log("Entry created successfully:", entry)
+  } catch (error) {
+    console.error("Error migrating post:", error)
+  }
+}
+
+// Example usage:
+migratePost(1) // Migrate post with ID 1
