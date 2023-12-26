@@ -28,6 +28,7 @@ async function migratePost(from, to) {
         id: {
           gte: from,
         },
+        status: true,
       },
       take: to,
     }) // Fetch 5 posts
@@ -76,4 +77,9 @@ async function migratePost(from, to) {
   }
 }
 
-migratePost(0, 5)
+/** Failed
+ *
+ * 128
+ */
+
+migratePost(153, 200)
