@@ -36,16 +36,11 @@ async function migratePost(postId) {
       published_at,
     } = post
 
-    const richText = richTextFromMarkdown(text, richTextOptions)
+    // const richText = richTextFromMarkdown(text, richTextOptions)
 
     // Fetch space and environment
     const space = await client.getSpace(envVars.spaceId)
     const environment = await space.getEnvironment(envVars.environmentId)
-
-    // Fetch content type (uncomment and verify)
-    const contentType = await environment.getContentType(contentTypeIds.posts)
-    contentType.fields.body = richText.content // Update content type field (if needed)
-    await contentType.update()
 
     const entryData = {
       fields: {
@@ -53,12 +48,12 @@ async function migratePost(postId) {
         slug: { "en-US": slug },
         subtitle: { "en-US": subtitle },
         excerpt: { "en-US": summary },
-        body: { "en-US": richText },
+        body: { "en-US": text },
         // Add other fields as needed
       },
     }
 
-    const entry = await space.createEntry(contentTypeIds.posts, entryData)
+    const entry = await environment.createEntry(contentTypeIds.posts, entryData)
     console.log("Entry created successfully:", entry)
   } catch (error) {
     console.error("Error migrating post:", error)
