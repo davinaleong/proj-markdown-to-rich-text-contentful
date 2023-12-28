@@ -19,8 +19,6 @@ async function generateContent(post, content = [], separator = "") {
   prompt += `In the format ${format}.`
   prompt += ` Content: ${post}`
 
-  // console.log(prompt)
-
   const completion = await openai.chat.completions.create({
     messages: [{ role: "system", content: prompt }],
     model: "gpt-3.5-turbo",
