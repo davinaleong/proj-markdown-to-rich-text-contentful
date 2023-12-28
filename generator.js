@@ -6,27 +6,6 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 const WORDS = `words`
 const CHARACTERS = `characters`
 
-// async function generateContent(
-//   post,
-//   separator = "`",
-//   lengths = {
-//     title: `5 words`,
-//     metaDescription: `20 words`,
-//     excerpt: `50 words`,
-//     googleTags: `100 characters`,
-//   }
-// ) {
-//   const { title, metaDescription, excerpt, googleTags } = lengths
-//   const prompt = `Generate a title in ${title}, a meta description in ${metaDescription}, an excerpt in ${excerpt}, and comma separared Google tags in ${googleTags}. Add a separator for each content so that it's easy to split in code. Content: ${post}`
-
-//   const completion = await openai.chat.completions.create({
-//     messages: [{ role: "system", content: prompt }],
-//     model: "gpt-3.5-turbo",
-//   })
-
-//   console.log(completion.choices[0])
-// }
-
 async function generateContent(post, content = [], separator = "") {
   let prompt = `Generate a `
   let format = ``
