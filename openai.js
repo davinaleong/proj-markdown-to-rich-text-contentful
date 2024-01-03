@@ -12,4 +12,4 @@ async function main(prompt) {
   console.log(completion.choices[0])
 }
 
-main("Tell me a fact about eagles.")
+main("Tell me a joke.")
